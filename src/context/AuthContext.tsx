@@ -1,0 +1,157 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import {authService, AuthUser, RequestCodeResult} from '../api/authService';
+import {setAuthToken} from '../api/client';
+import {Locale} from '../i18n';
+
+const TOKEN_KEY = 'ahora.auth.token';
+const USER_KEY = 'ahora.auth.user';
+const ONBOARDING_KEY = 'ahora.onboarding.seen';
+
+interface AuthContextValue {
+  user: AuthUser | null;
+  token: string | null;
+  loading: boolean;
+  onboardingSeen: boolean;
+  locale: Locale;
+  requestCode: (payload: {
+    email: string;
+    firstName?: string;
+    locale?: Locale;
+  }) => Promise<RequestCodeResult>;
+  verifyCode: (payload: {email: string; code: string}) => Promise<void>;
+  updateProfile: (payload: {
+    firstName?: string;
+    locale?: Locale;
+    onboarding?: AuthUser['onboarding'];
+  }) => Promise<void>;
+  setUser: (u: AuthUser) => void;
+  logout: () => Promise<void>;
+  completeOnboarding: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export function AuthProvider({children}: {children: React.ReactNode}) {
+  const [user, setUserState] = useState<AuthUser | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [onboardingSeen, setOnboardingSeen] = useState(false);
+
+  useEffect(() => {
+    async function restore() {
+      try {
+        const [storedToken, storedUser, seen] = await Promise.all([
+          AsyncStorage.getItem(TOKEN_KEY),
+          AsyncStorage.getItem(USER_KEY),
+          AsyncStorage.getItem(ONBOARDING_KEY),
+        ]);
+        if (storedToken && storedUser) {
+          setAuthToken(storedToken);
+          setToken(storedToken);
+          setUserState(JSON.parse(storedUser));
+        }
+        setOnboardingSeen(seen === 'true');
+      } finally {
+        setLoading(false);
+      }
+    }
+    restore();
+  }, []);
+
+  const persistAuth = useCallback(async (nextUser: AuthUser) => {
+    setAuthToken(nextUser.token);
+    setUserState(nextUser);
+    setToken(nextUser.token);
+    await Promise.all([
+      AsyncStorage.setItem(TOKEN_KEY, nextUser.token),
+      AsyncStorage.setItem(USER_KEY, JSON.stringify(nextUser)),
+    ]);
+  }, []);
+
+  const requestCode = useCallback(
+    (payload: {email: string; firstName?: string; locale?: Locale}) =>
+      authService.requestCode(payload),
+    [],
+  );
+
+  const verifyCode = useCallback(
+    async (payload: {email: string; code: string}) => {
+      const nextUser = await authService.verifyCode(payload);
+      await persistAuth(nextUser);
+    },
+    [persistAuth],
+  );
+
+  const setUser = useCallback(
+    (u: AuthUser) => {
+      setUserState(u);
+      AsyncStorage.setItem(USER_KEY, JSON.stringify(u));
+    },
+    [],
+  );
+
+  const updateProfile = useCallback(
+    async (payload: {
+      firstName?: string;
+      locale?: Locale;
+      onboarding?: AuthUser['onboarding'];
+    }) => {
+      const updated = await authService.updateMe(payload);
+      // updateMe no devuelve token; conservamos el actual.
+      setUserState(prev => {
+        const merged = {...(prev || {}), ...updated, token: prev?.token || token || ''} as AuthUser;
+        AsyncStorage.setItem(USER_KEY, JSON.stringify(merged));
+        return merged;
+      });
+    },
+    [token],
+  );
+
+  const logout = useCallback(async () => {
+    setAuthToken(null);
+    setUserState(null);
+    setToken(null);
+    await Promise.all([
+      AsyncStorage.removeItem(TOKEN_KEY),
+      AsyncStorage.removeItem(USER_KEY),
+    ]);
+  }, []);
+
+  const completeOnboarding = useCallback(async () => {
+    setOnboardingSeen(true);
+    await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      loading,
+      onboardingSeen,
+      locale: (user?.locale as Locale) || 'es',
+      requestCode,
+      verifyCode,
+      updateProfile,
+      setUser,
+      logout,
+      completeOnboarding,
+    }),
+    [user, token, loading, onboardingSeen, requestCode, verifyCode, updateProfile, setUser, logout, completeOnboarding],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
+  return ctx;
+}
