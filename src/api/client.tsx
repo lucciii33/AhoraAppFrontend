@@ -1,10 +1,13 @@
 import axios from 'axios';
 import {Platform} from 'react-native';
 
+// Puerto del backend — debe coincidir con PORT en ahora-backend/.env
+const PORT = 8000;
+
 // iOS sim: localhost works. Android emulator: 10.0.2.2 maps to host.
-// Real device: cambia esto a la IP LAN de tu máquina (ej: http://192.168.1.42:5050)
+// Real device: cambia esto a la IP LAN de tu máquina (ej: http://192.168.1.42:8000)
 const HOST =
-  Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
+  Platform.OS === 'android' ? `http://10.0.2.2:${PORT}` : `http://localhost:${PORT}`;
 
 const client = axios.create({
   baseURL: `${HOST}/api`,

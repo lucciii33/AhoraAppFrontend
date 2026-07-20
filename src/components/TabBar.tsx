@@ -5,6 +5,11 @@ import {Icon, IconName} from './Icon';
 
 export type TabId = 'dashboard' | 'home' | 'lesson' | 'chat';
 
+// Alto total que la barra flotante ocupa desde el borde inferior de la
+// pantalla (bottom: 18 + alto de la barra). Las pantallas con contenido fijo
+// abajo lo usan para no quedar tapadas.
+export const TAB_BAR_SPACE = 84;
+
 const TABS: {id: TabId; icon: IconName; es: string; en: string}[] = [
   {id: 'dashboard', icon: 'home', es: 'Inicio', en: 'Home'},
   {id: 'home', icon: 'sun', es: 'Hoy', en: 'Today'},

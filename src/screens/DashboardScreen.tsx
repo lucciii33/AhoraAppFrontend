@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, Pressable, StyleSheet} from 'react-native';
+import {View, Text, Pressable, Alert, StyleSheet} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Sky} from '../components/Sky';
 import {CloudCard, IconButton} from '../components/ui';
@@ -13,8 +13,19 @@ import {DailyEntry, Devotional, StreakInfo, WeekDay} from '../api/types';
 // Dashboard — "Inicio": panel del día.
 export default function DashboardScreen({navigation, switchTab}: any) {
   const insets = useSafeAreaInsets();
-  const {user, locale} = useAuth();
+  const {user, locale, logout} = useAuth();
   const T = tr(locale);
+  const en = locale === 'en';
+
+  const confirmLogout = () =>
+    Alert.alert(
+      en ? 'Sign out?' : '¿Cerrar sesión?',
+      en ? 'You can come back whenever you want.' : 'Puedes volver cuando quieras.',
+      [
+        {text: en ? 'Cancel' : 'Cancelar', style: 'cancel'},
+        {text: en ? 'Sign out' : 'Cerrar sesión', style: 'destructive', onPress: () => logout()},
+      ],
+    );
 
   const [streak, setStreak] = useState<StreakInfo | null>(user?.streak || null);
   const [week, setWeek] = useState<WeekDay[]>([]);
@@ -71,6 +82,7 @@ export default function DashboardScreen({navigation, switchTab}: any) {
           </Text>
         </View>
         <IconButton name="bell" onPress={() => navigation.navigate('Notifications')} />
+        <IconButton name="logout" onPress={confirmLogout} />
       </View>
 
       {/* accesos rápidos */}

@@ -8,7 +8,7 @@ export type IconName =
   | 'home' | 'book' | 'chat' | 'user' | 'arrowRight' | 'arrowLeft' | 'close'
   | 'bell' | 'heart' | 'bookmark' | 'check' | 'send' | 'sparkle' | 'moon'
   | 'settings' | 'sun' | 'feather' | 'wind' | 'apple' | 'google' | 'quote'
-  | 'play' | 'flame' | 'list' | 'plus' | 'search';
+  | 'play' | 'flame' | 'list' | 'plus' | 'search' | 'logout';
 
 function paths(name: IconName, color: string) {
   switch (name) {
@@ -38,6 +38,7 @@ function paths(name: IconName, color: string) {
     case 'list': return <Path d="M4 6h16M4 12h16M4 18h16" />;
     case 'plus': return <Path d="M12 5v14M5 12h14" />;
     case 'search': return <G><Circle cx="11" cy="11" r="7" /><Path d="m20 20-3.5-3.5" /></G>;
+    case 'logout': return <G><Path d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3" /><Path d="M10 17l-5-5 5-5M5 12h11" /></G>;
     default: return null;
   }
 }

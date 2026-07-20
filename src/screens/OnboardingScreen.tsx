@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, Pressable, StyleSheet} from 'react-native';
+import {View, Text, Pressable, ScrollView, StyleSheet} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Sky} from '../components/Sky';
 import {Button, IconButton, RisingSun} from '../components/ui';
@@ -17,7 +17,16 @@ const OPTIONS: {es: string; en: string; key: string}[] = [
   {key: 'enojo', es: 'enojo', en: 'anger'},
   {key: 'prisa', es: 'prisa', en: 'hurry'},
 ];
-const TIMES = ['5:30', '6:00', '6:30', '7:00', '7:30', '8:00'];
+// Todas las horas del día, de 12:00 AM a 11:30 PM, cada media hora.
+const TIMES = Array.from({length: 48}, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = i % 2 ? '30' : '00';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return {
+    value: `${String(h).padStart(2, '0')}:${m}`,
+    label: `${h12}:${m} ${h < 12 ? 'AM' : 'PM'}`,
+  };
+});
 
 export default function OnboardingScreen({navigation}: any) {
   const insets = useSafeAreaInsets();
@@ -26,7 +35,7 @@ export default function OnboardingScreen({navigation}: any) {
 
   const [step, setStep] = useState(1);
   const [picks, setPicks] = useState<Set<string>>(new Set(['ansiedad']));
-  const [time, setTime] = useState('6:30');
+  const [time, setTime] = useState('06:30');
 
   const toggle = (k: string) =>
     setPicks(prev => {
@@ -103,20 +112,22 @@ export default function OnboardingScreen({navigation}: any) {
             <Text style={styles.p}>
               {en ? 'We will remind you gently, like a sunrise.' : 'Te recordaremos con suavidad, como un amanecer.'}
             </Text>
-            <View style={styles.times}>
+            <ScrollView
+              style={styles.timesScroll}
+              contentContainerStyle={styles.times}
+              showsVerticalScrollIndicator={false}>
               {TIMES.map(tt => {
-                const on = time === tt;
+                const on = time === tt.value;
                 return (
                   <Pressable
-                    key={tt}
-                    onPress={() => setTime(tt)}
+                    key={tt.value}
+                    onPress={() => setTime(tt.value)}
                     style={[styles.timeCell, on ? styles.chipOn : styles.chipOff]}>
-                    <Text style={[styles.timeText, {color: on ? '#fff' : colors.inkSoft}]}>{tt}</Text>
+                    <Text style={[styles.timeText, {color: on ? '#fff' : colors.inkSoft}]}>{tt.label}</Text>
                   </Pressable>
                 );
               })}
-            </View>
-            <View style={{flex: 1}} />
+            </ScrollView>
             <Button variant="primary" fullWidth onPress={onNext}>
               {en ? 'Continue' : 'Continuar'}
             </Button>
@@ -158,7 +169,8 @@ const styles = StyleSheet.create({
   chipOn: {backgroundColor: colors.skyDeep},
   chipOff: {backgroundColor: 'rgba(255,255,255,0.66)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)'},
   chipText: {fontFamily: font.body, fontSize: 15, fontWeight: '600', textTransform: 'capitalize'},
-  times: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
-  timeCell: {width: '31%', paddingVertical: 18, borderRadius: 18, alignItems: 'center'},
-  timeText: {fontFamily: font.display, fontSize: 22, fontWeight: '500'},
+  timesScroll: {flex: 1, marginBottom: 18},
+  times: {flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, paddingBottom: 8},
+  timeCell: {width: '31.5%', paddingVertical: 14, borderRadius: 18, alignItems: 'center'},
+  timeText: {fontFamily: font.display, fontSize: 17, fontWeight: '500'},
 });
