@@ -39,6 +39,7 @@ export interface Progress {
   _id: string;
   day: string;
   stations: Record<StationKey, boolean>;
+  visited: boolean; // abrió la app ese día
   taskText: string;
 }
 

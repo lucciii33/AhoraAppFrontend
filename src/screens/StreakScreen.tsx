@@ -10,6 +10,7 @@ import {useAuth} from '../context/AuthContext';
 import {L, tr} from '../i18n';
 import {dailyService, devotionalService} from '../api/contentService';
 import {Devotional, StreakInfo, WeekDay} from '../api/types';
+import {emptyWeek} from './DashboardScreen';
 
 // Camino / Racha — anillo de progreso, semana, totales y devocionales anteriores.
 export default function StreakScreen({navigation}: any) {
@@ -86,7 +87,7 @@ export default function StreakScreen({navigation}: any) {
       {/* semana */}
       <CloudCard style={{padding: 18}}>
         <View style={styles.weekRow}>
-          {(week.length ? week : placeholder()).map((d, i) => (
+          {(week.length ? week : emptyWeek()).map((d, i) => (
             <View key={i} style={styles.weekCell}>
               <Text style={styles.weekLabel}>{d.d}</Text>
               <View
@@ -146,9 +147,6 @@ export default function StreakScreen({navigation}: any) {
   );
 }
 
-function placeholder(): WeekDay[] {
-  return ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => ({d, day: '', done: i < 5, today: i === 5}));
-}
 
 const styles = StyleSheet.create({
   header: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16},

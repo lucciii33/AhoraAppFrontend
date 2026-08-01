@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {View, Text, Pressable, Alert, StyleSheet} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Sky} from '../components/Sky';
@@ -9,6 +9,7 @@ import {useAuth} from '../context/AuthContext';
 import {L, fechaHoy, tr} from '../i18n';
 import {dailyService, devotionalService} from '../api/contentService';
 import {DailyEntry, Devotional, StreakInfo, WeekDay} from '../api/types';
+import {useAppForeground} from '../hooks/useAppForeground';
 
 // Dashboard — "Inicio": panel del día.
 export default function DashboardScreen({navigation, switchTab}: any) {
@@ -32,34 +33,33 @@ export default function DashboardScreen({navigation, switchTab}: any) {
   const [entry, setEntry] = useState<DailyEntry | null>(null);
   const [recent, setRecent] = useState<Devotional[]>([]);
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const [s, today, rec] = await Promise.all([
-          dailyService.streak(),
-          dailyService.today(),
-          devotionalService.recent(4),
-        ]);
-        if (!alive) return;
-        setStreak(s.streak);
-        setWeek(s.week);
-        setEntry(today.entry);
-        setRecent(rec);
-      } catch {
-        /* sin conexión: se muestran los valores por defecto */
-      }
-    })();
-    return () => {
-      alive = false;
-    };
+  const load = useCallback(async () => {
+    try {
+      // `today()` es lo que marca la visita del día, así que va ANTES de
+      // `streak()`: en paralelo, la semana podía calcularse sin la marca de hoy
+      // y el día salía vacío hasta la siguiente carga.
+      const today = await dailyService.today();
+      const [s, rec] = await Promise.all([
+        dailyService.streak(),
+        devotionalService.recent(4),
+      ]);
+      setEntry(today.entry);
+      setStreak(s.streak);
+      setWeek(s.week);
+      setRecent(rec);
+    } catch {
+      /* sin conexión: se muestran los valores por defecto */
+    }
   }, []);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  // Volver a primer plano puede significar un día nuevo: hay que remarcarlo.
+  useAppForeground(load);
+
   const racha = streak?.current ?? 0;
-  const reflDevId =
-    entry && entry.reflection && typeof entry.reflection.devotional === 'object'
-      ? (entry.reflection.devotional as Devotional)._id
-      : undefined;
 
   const accesos = [
     {id: 'hoy', label: locale === 'en' ? 'Today' : 'Hoy', sub: T.todayPath, icon: 'sun' as const, bg: colors.skySoft, fg: colors.skyInk, go: () => switchTab('home')},
@@ -67,8 +67,10 @@ export default function DashboardScreen({navigation, switchTab}: any) {
     {id: 'racha', label: T.myStreak, sub: `${racha} ${T.days}`, icon: 'flame' as const, bg: colors.skySoft, fg: colors.skyInk, go: () => navigation.navigate('Streak')},
   ];
 
-  const openTask = () =>
-    reflDevId ? navigation.navigate('Lesson', {devotionalId: reflDevId}) : switchTab('home');
+  // La tarjeta pide escribir, así que lleva a la estación de la tarea, que vive
+  // en Home: es la única pantalla con el campo de texto. `Lesson` es solo lectura.
+  // El 'tarea' hace que Home baje hasta esa estación en vez de quedarse arriba.
+  const openTask = () => switchTab('home', 'tarea');
 
   return (
     <Sky variant="day" scroll contentStyle={{paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 150}}>
@@ -117,7 +119,7 @@ export default function DashboardScreen({navigation, switchTab}: any) {
           <Icon name="arrowRight" size={20} color={colors.sand} />
         </View>
         <View style={styles.weekRow}>
-          {(week.length ? week : placeholderWeek()).map((s, i) => (
+          {(week.length ? week : emptyWeek()).map((s, i) => (
             <View key={i} style={styles.weekCell}>
               <View
                 style={[
@@ -143,11 +145,8 @@ export default function DashboardScreen({navigation, switchTab}: any) {
           <Icon name="feather" size={17} color={colors.rose} />
           <Text style={styles.taskKicker}>{T.taskOfDay.toUpperCase()}</Text>
         </View>
-        <Text style={styles.taskText}>
-          {entry ? L(entry.task.prompt, locale) : locale === 'en'
-            ? 'Recall something you saw as a problem and write how, over time, it brought you a lesson.'
-            : 'Recuerda algo que viviste como un problema y escribe cómo, con el tiempo, te trajo un aprendizaje.'}
-        </Text>
+        {/* Sin texto inventado de reserva: mientras no cargue el día, en blanco. */}
+        <Text style={styles.taskText}>{entry ? L(entry.task.prompt, locale) : ''}</Text>
         <View style={styles.taskCta}>
           <Text style={styles.taskCtaText}>{T.writeReflection}</Text>
           <Icon name="arrowRight" size={15} color="#fff" />
@@ -196,8 +195,16 @@ function typeLabel(type: string, locale: string) {
   return locale === 'en' ? pair[1] : pair[0];
 }
 
-function placeholderWeek(): WeekDay[] {
-  return ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => ({d, day: '', done: i < 4, today: i === 4}));
+// Semana vacía mientras carga o si no hay conexión. Nunca marca días como
+// hechos: solo el backend sabe cuáles lo están.
+export function emptyWeek(): WeekDay[] {
+  const hoy = (new Date().getDay() + 6) % 7; // 0 = lunes
+  return ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => ({
+    d,
+    day: '',
+    done: false,
+    today: i === hoy,
+  }));
 }
 
 const styles = StyleSheet.create({

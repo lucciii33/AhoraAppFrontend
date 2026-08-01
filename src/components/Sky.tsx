@@ -42,12 +42,15 @@ export function Sky({
   clouds = true,
   children,
   contentStyle,
+  scrollRef,
 }: {
   variant?: 'dawn' | 'day' | 'soft' | 'reading' | 'night';
   scroll?: boolean;
   clouds?: boolean;
   children: React.ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
+  // Deja que la pantalla controle el scroll (p. ej. bajar a una estación).
+  scrollRef?: React.RefObject<ScrollView | null>;
 }) {
   return (
     <View style={styles.root}>
@@ -55,6 +58,7 @@ export function Sky({
       {clouds && <Clouds />}
       {scroll ? (
         <ScrollView
+          ref={scrollRef}
           style={styles.fill}
           contentContainerStyle={contentStyle}
           showsVerticalScrollIndicator={false}
