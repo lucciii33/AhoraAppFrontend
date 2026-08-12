@@ -83,7 +83,15 @@ export default function DashboardScreen({navigation, switchTab}: any) {
             {user?.firstName || (locale === 'en' ? 'friend' : 'amiga')}.
           </Text>
         </View>
-        <IconButton name="bell" onPress={() => navigation.navigate('Notifications')} />
+        {/*
+          Aquí había una campana que abría los avisos in-app ("La voz de
+          AHORA"). Se cambia por la rueda de Ajustes: la campana promete
+          notificaciones del sistema —las que llegan al iPhone— y esos avisos
+          no son eso. La pantalla y su endpoint siguen intactos, listos para
+          cuando se decida dónde colocarlos:
+            <IconButton name="bell" onPress={() => navigation.navigate('Notifications')} />
+        */}
+        <IconButton name="settings" onPress={() => navigation.navigate('Settings')} />
         <IconButton name="logout" onPress={confirmLogout} />
       </View>
 

@@ -14,7 +14,10 @@ import ChatScreen from '../screens/ChatScreen';
 import ChatsScreen from '../screens/ChatsScreen';
 import StreakScreen from '../screens/StreakScreen';
 import DevocionalesScreen from '../screens/DevocionalesScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+// Los avisos in-app siguen implementados, pero hoy nada los abre: la campana
+// del Dashboard se cambió por la rueda de Ajustes (ver DashboardScreen).
+// import NotificationsScreen from '../screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -59,7 +62,8 @@ export default function AppNavigator() {
             <Stack.Screen name="Chats" component={ChatsScreen} />
             <Stack.Screen name="Streak" component={StreakScreen} />
             <Stack.Screen name="Devocionales" component={DevocionalesScreen} />
-            <Stack.Screen name="Notifications" component={NotificationsScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            {/* <Stack.Screen name="Notifications" component={NotificationsScreen} /> */}
           </>
         )}
       </Stack.Navigator>
