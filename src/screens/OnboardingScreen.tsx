@@ -5,8 +5,15 @@ import {Sky} from '../components/Sky';
 import {Button, IconButton, RisingSun} from '../components/ui';
 import {colors, font} from '../theme';
 import {useAuth} from '../context/AuthContext';
+import {Locale} from '../i18n';
 
-// Onboarding — tres pasos serenos antes de crear la cuenta.
+// Onboarding — cuatro pasos serenos antes de crear la cuenta.
+// El primero es el idioma: todo lo que viene después ya se ve en él.
+const LANGUAGES: {key: Locale; label: string; caption: string}[] = [
+  {key: 'es', label: 'Español', caption: 'Continuar en español'},
+  {key: 'en', label: 'English', caption: 'Continue in English'},
+];
+
 const OPTIONS: {es: string; en: string; key: string}[] = [
   {key: 'ansiedad', es: 'ansiedad', en: 'anxiety'},
   {key: 'miedo', es: 'miedo', en: 'fear'},
@@ -30,12 +37,14 @@ const TIMES = Array.from({length: 48}, (_, i) => {
 
 export default function OnboardingScreen({navigation}: any) {
   const insets = useSafeAreaInsets();
-  const {locale, completeOnboarding} = useAuth();
+  const {locale, setLocale, completeOnboarding} = useAuth();
   const en = locale === 'en';
 
   const [step, setStep] = useState(1);
   const [picks, setPicks] = useState<Set<string>>(new Set(['ansiedad']));
   const [time, setTime] = useState('06:30');
+
+  const TOTAL_STEPS = 4;
 
   const toggle = (k: string) =>
     setPicks(prev => {
@@ -48,8 +57,16 @@ export default function OnboardingScreen({navigation}: any) {
     if (step > 1) setStep(step - 1);
     else navigation.goBack();
   };
+  // Elegir idioma lo aplica al momento y avanza: el resto del onboarding, y
+  // la pantalla de acceso, ya se ven en el idioma elegido. Al crear la cuenta
+  // viaja en `locale` a `request-code` y se guarda en el perfil.
+  const pickLanguage = async (l: Locale) => {
+    await setLocale(l);
+    setStep(2);
+  };
+
   const onNext = async () => {
-    if (step < 3) {
+    if (step < TOTAL_STEPS) {
       setStep(step + 1);
     } else {
       await completeOnboarding();
@@ -69,7 +86,7 @@ export default function OnboardingScreen({navigation}: any) {
         <View style={styles.progressRow}>
           <IconButton name="arrowLeft" size={38} onPress={onBack} />
           <View style={styles.bars}>
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3, 4].map(i => (
               <View
                 key={i}
                 style={[styles.bar, {backgroundColor: i <= step ? colors.skyDeep : 'rgba(255,255,255,0.6)'}]}
@@ -79,6 +96,39 @@ export default function OnboardingScreen({navigation}: any) {
         </View>
 
         {step === 1 && (
+          <View style={styles.step}>
+            {/* Bilingüe a propósito: aún no sabemos qué idioma habla. */}
+            <Text style={styles.h1}>{'Elige tu idioma\nChoose your language'}</Text>
+            <Text style={styles.p}>
+              Puedes cambiarlo cuando quieras. · You can change it anytime.
+            </Text>
+            <View style={styles.langs}>
+              {LANGUAGES.map(l => {
+                const on = locale === l.key;
+                return (
+                  <Pressable
+                    key={l.key}
+                    onPress={() => pickLanguage(l.key)}
+                    style={[styles.lang, on ? styles.chipOn : styles.chipOff]}>
+                    <Text style={[styles.langLabel, {color: on ? '#fff' : colors.inkSoft}]}>
+                      {l.label}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.langCaption,
+                        {color: on ? 'rgba(255,255,255,0.85)' : colors.earth},
+                      ]}>
+                      {l.caption}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <View style={{flex: 1}} />
+          </View>
+        )}
+
+        {step === 2 && (
           <View style={styles.step}>
             <Text style={styles.h1}>{en ? 'What do you want\nto surrender today?' : '¿Qué quieres\nentregar hoy?'}</Text>
             <Text style={styles.p}>
@@ -106,7 +156,7 @@ export default function OnboardingScreen({navigation}: any) {
           </View>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <View style={styles.step}>
             <Text style={styles.h1}>{en ? 'When is your\ntime with God?' : '¿Cuándo es tu\nmomento con Dios?'}</Text>
             <Text style={styles.p}>
@@ -134,7 +184,7 @@ export default function OnboardingScreen({navigation}: any) {
           </View>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <View style={[styles.step, {alignItems: 'center', justifyContent: 'center'}]}>
             <RisingSun size={96} />
             <Text style={[styles.h1, {textAlign: 'center', marginTop: 22}]}>
@@ -165,6 +215,10 @@ const styles = StyleSheet.create({
   h1: {fontFamily: font.display, fontWeight: '500', fontSize: 34, lineHeight: 38, color: colors.inkSoft},
   p: {marginTop: 12, marginBottom: 26, fontFamily: font.body, fontSize: 15.5, lineHeight: 23, color: colors.earth},
   chips: {flexDirection: 'row', flexWrap: 'wrap', gap: 10},
+  langs: {gap: 12},
+  lang: {paddingVertical: 20, paddingHorizontal: 22, borderRadius: 22},
+  langLabel: {fontFamily: font.display, fontSize: 24, fontWeight: '500'},
+  langCaption: {marginTop: 4, fontFamily: font.body, fontSize: 14.5},
   chip: {paddingVertical: 12, paddingHorizontal: 18, borderRadius: 999},
   chipOn: {backgroundColor: colors.skyDeep},
   chipOff: {backgroundColor: 'rgba(255,255,255,0.66)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)'},

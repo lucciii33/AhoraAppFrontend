@@ -14,6 +14,7 @@ import {Locale} from '../i18n';
 const TOKEN_KEY = 'ahora.auth.token';
 const USER_KEY = 'ahora.auth.user';
 const ONBOARDING_KEY = 'ahora.onboarding.seen';
+const LOCALE_KEY = 'ahora.locale';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -33,6 +34,7 @@ interface AuthContextValue {
     onboarding?: AuthUser['onboarding'];
   }) => Promise<void>;
   setUser: (u: AuthUser) => void;
+  setLocale: (l: Locale) => Promise<void>;
   logout: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
 }
@@ -44,14 +46,18 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [onboardingSeen, setOnboardingSeen] = useState(false);
+  // Idioma elegido en el onboarding, antes de que exista el usuario. Una vez
+  // hay cuenta manda `user.locale` (que el onboarding guarda al registrarse).
+  const [pickedLocale, setPickedLocale] = useState<Locale>('es');
 
   useEffect(() => {
     async function restore() {
       try {
-        const [storedToken, storedUser, seen] = await Promise.all([
+        const [storedToken, storedUser, seen, savedLocale] = await Promise.all([
           AsyncStorage.getItem(TOKEN_KEY),
           AsyncStorage.getItem(USER_KEY),
           AsyncStorage.getItem(ONBOARDING_KEY),
+          AsyncStorage.getItem(LOCALE_KEY),
         ]);
         if (storedToken && storedUser) {
           setAuthToken(storedToken);
@@ -59,6 +65,9 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
           setUserState(JSON.parse(storedUser));
         }
         setOnboardingSeen(seen === 'true');
+        if (savedLocale === 'es' || savedLocale === 'en') {
+          setPickedLocale(savedLocale);
+        }
       } finally {
         setLoading(false);
       }
@@ -115,6 +124,21 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     [token],
   );
 
+  // Cambia el idioma. Antes de tener cuenta solo se guarda en el dispositivo;
+  // con sesión abierta se persiste también en el perfil.
+  const setLocale = useCallback(
+    async (l: Locale) => {
+      setPickedLocale(l);
+      await AsyncStorage.setItem(LOCALE_KEY, l);
+      if (token) {
+        try {
+          await updateProfile({locale: l});
+        } catch {}
+      }
+    },
+    [token, updateProfile],
+  );
+
   const logout = useCallback(async () => {
     setAuthToken(null);
     setUserState(null);
@@ -136,15 +160,16 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       token,
       loading,
       onboardingSeen,
-      locale: (user?.locale as Locale) || 'es',
+      locale: (user?.locale as Locale) || pickedLocale,
       requestCode,
       verifyCode,
       updateProfile,
       setUser,
+      setLocale,
       logout,
       completeOnboarding,
     }),
-    [user, token, loading, onboardingSeen, requestCode, verifyCode, updateProfile, setUser, logout, completeOnboarding],
+    [user, token, loading, onboardingSeen, pickedLocale, requestCode, verifyCode, updateProfile, setUser, setLocale, logout, completeOnboarding],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -10,7 +10,7 @@ siguiendo sus convenciones: `src/theme.ts` (tokens), `src/api/*` (axios),
 
 ## Requisitos
 - Node ≥ 20, la CLI de React Native y su entorno (Xcode / Android Studio).
-- El backend `ahora-backend` corriendo (por defecto en `http://localhost:5000`).
+- El backend `ahora-backend` corriendo (por defecto en `http://localhost:8000`).
 
 ## Arrancar
 ```bash
@@ -22,7 +22,7 @@ npm run ios
 npm run android
 ```
 
-> El emulador Android usa `http://10.0.2.2:5000`; iOS usa `localhost`.
+> El emulador Android usa `http://10.0.2.2:8000`; iOS usa `localhost`.
 > Para un dispositivo físico, edita `HOST` en `src/api/client.tsx` con la IP LAN de tu Mac.
 
 ## Autenticación (OTP por email)
@@ -53,4 +53,10 @@ vienen incluidas: mientras no se enlacen, RN usa la fuente del sistema. Ver
 
 ## Idioma (es/en)
 Todo el contenido del backend es bilingüe (`{ es, en }`) y los textos de UI
-viven en `src/i18n.ts`. El idioma sale de `user.locale` (por defecto `es`).
+viven en `src/i18n.ts`.
+
+El idioma se elige en el **primer paso del onboarding**, antes de crear la
+cuenta: se aplica al instante (el resto del onboarding y la pantalla de acceso
+ya se ven en él), se guarda en `AsyncStorage` y viaja en `locale` al registrarse
+para quedar en `user.locale`. Con sesión abierta, `setLocale()` del
+`AuthContext` lo actualiza también en el perfil.

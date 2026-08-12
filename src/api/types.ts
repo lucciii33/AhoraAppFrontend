@@ -5,8 +5,7 @@ export type LText = {es?: string; en?: string};
 
 export interface Devotional {
   _id: string;
-  order: number;
-  date: string;
+  dayNumber: number;
   quote: LText;
   reference: string;
   readingMinutes: number;
@@ -20,7 +19,7 @@ export interface Devotional {
 
 export interface DailyEntry {
   _id: string;
-  day: string;
+  dayNumber: number; // día del camino (1, 2, 3…), no una fecha
   morningPrayer: LText;
   reflection: {devotional?: Devotional | string; summary: LText};
   practice: {title: LText; text: LText; question: LText};
@@ -37,7 +36,8 @@ export type StationKey =
 
 export interface Progress {
   _id: string;
-  day: string;
+  day: string; // fecha de calendario YYYY-MM-DD (racha)
+  dayNumber: number; // día del camino que le tocó esa fecha (contenido)
   stations: Record<StationKey, boolean>;
   visited: boolean; // abrió la app ese día
   taskText: string;

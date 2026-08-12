@@ -13,7 +13,12 @@ import {
 
 // ── Camino del día ──────────────────────────────────────────────
 export const dailyService = {
-  today: async (): Promise<{day: string; entry: DailyEntry | null; progress: Progress}> => {
+  today: async (): Promise<{
+    day: string;
+    dayNumber: number;
+    entry: DailyEntry | null;
+    progress: Progress;
+  }> => {
     const res = await client.get('/daily/today');
     return res.data;
   },
