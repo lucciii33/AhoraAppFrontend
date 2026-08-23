@@ -42,9 +42,9 @@ export default function DevocionalesScreen({navigation}: any) {
   const go = (p: number) => setPage(Math.min(Math.max(1, p), totalPages));
 
   return (
-    <Sky variant="day" scroll contentStyle={{paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 60}}>
+    <Sky testID="screen-devocionales" variant="day" scroll contentStyle={{paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 60}}>
       <View style={styles.header}>
-        <IconButton name="arrowLeft" onPress={() => navigation.goBack()} />
+        <IconButton testID="devocionales-back" name="arrowLeft" onPress={() => navigation.goBack()} />
         <Text style={styles.headerTitle}>{T.devotionals.toUpperCase()}</Text>
         <View style={{width: 40}} />
       </View>
@@ -60,6 +60,7 @@ export default function DevocionalesScreen({navigation}: any) {
           return (
             <CloudCard
               key={a._id}
+              testID={`devocionales-item-${a._id}`}
               onPress={() => navigation.navigate('Lesson', {devotionalId: a._id})}
               style={styles.item}>
               <View style={[styles.itemIcon, {backgroundColor: tint + '1F'}]}>
@@ -67,7 +68,7 @@ export default function DevocionalesScreen({navigation}: any) {
               </View>
               <View style={{flex: 1}}>
                 <Text style={styles.itemTitle} numberOfLines={2}>{L(a.quote, locale).replace(/[""]/g, '')}</Text>
-                <Text style={styles.itemRef}>{a.reference}</Text>
+                <Text style={styles.itemRef}>{L(a.reference, locale)}</Text>
               </View>
             </CloudCard>
           );
@@ -76,19 +77,20 @@ export default function DevocionalesScreen({navigation}: any) {
 
       {/* paginación */}
       <View style={styles.pagination}>
-        <IconButton name="arrowLeft" onPress={() => go(page - 1)} style={page === 1 ? {opacity: 0.4} : undefined} />
+        <IconButton testID="devocionales-prev" name="arrowLeft" onPress={() => go(page - 1)} style={page === 1 ? {opacity: 0.4} : undefined} />
         {Array.from({length: totalPages}, (_, i) => i + 1).map(n => {
           const on = n === page;
           return (
             <Pressable
               key={n}
+              testID={`devocionales-page-${n}`}
               onPress={() => go(n)}
               style={[styles.pageBtn, on ? styles.pageOn : styles.pageOff]}>
               <Text style={[styles.pageText, {color: on ? '#fff' : colors.earth}]}>{n}</Text>
             </Pressable>
           );
         })}
-        <IconButton name="arrowRight" onPress={() => go(page + 1)} style={page === totalPages ? {opacity: 0.4} : undefined} />
+        <IconButton testID="devocionales-next" name="arrowRight" onPress={() => go(page + 1)} style={page === totalPages ? {opacity: 0.4} : undefined} />
       </View>
     </Sky>
   );

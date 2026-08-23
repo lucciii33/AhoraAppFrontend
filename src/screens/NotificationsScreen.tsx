@@ -47,9 +47,9 @@ export default function NotificationsScreen({navigation}: any) {
   };
 
   return (
-    <Sky variant="day" scroll contentStyle={{paddingTop: insets.top + 8, paddingHorizontal: 22, paddingBottom: 60}}>
+    <Sky testID="screen-notifications" variant="day" scroll contentStyle={{paddingTop: insets.top + 8, paddingHorizontal: 22, paddingBottom: 60}}>
       <View style={styles.header}>
-        <IconButton name="arrowLeft" onPress={() => navigation.goBack()} />
+        <IconButton testID="notifications-back" name="arrowLeft" onPress={() => navigation.goBack()} />
         <Text style={styles.headerTitle}>{T.notices.toUpperCase()}</Text>
         <View style={{width: 40}} />
       </View>
@@ -60,7 +60,7 @@ export default function NotificationsScreen({navigation}: any) {
         {items.map(n => {
           const tint = TINTS[n.tint] || colors.sky;
           return (
-            <View key={n._id} style={styles.card}>
+            <View key={n._id} testID={`notifications-item-${n._id}`} style={styles.card}>
               <View style={[styles.icon, {backgroundColor: tint + '22'}]}>
                 <Icon name={n.icon as IconName} size={19} color={tint} />
               </View>

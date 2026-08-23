@@ -24,9 +24,11 @@ export default function AuthScreen({navigation, route}: any) {
   const {locale, requestCode, verifyCode, updateProfile} = useAuth();
   const en = locale === 'en';
   const onboardingParam = route?.params?.onboarding;
+  // Datos recogidos en el onboarding. Si se entra directo a esta pantalla
+  // (login de alguien que ya tiene cuenta) no viene nada y no se pide nada.
+  const profileParam = route?.params?.profile;
 
   const [step, setStep] = useState<'email' | 'code'>('email');
-  const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
@@ -41,7 +43,7 @@ export default function AuthScreen({navigation, route}: any) {
     try {
       const res = await requestCode({
         email: email.trim(),
-        firstName: firstName.trim() || undefined,
+        firstName: profileParam?.firstName || undefined,
         locale,
       });
       setStep('code');
@@ -62,9 +64,16 @@ export default function AuthScreen({navigation, route}: any) {
     setBusy(true);
     try {
       await verifyCode({email: email.trim(), code: code.trim()});
-      if (onboardingParam) {
+      if (onboardingParam || profileParam) {
         try {
-          await updateProfile({firstName: firstName.trim() || undefined, locale, onboarding: onboardingParam});
+          await updateProfile({
+            ...(profileParam?.firstName ? {firstName: profileParam.firstName} : {}),
+            ...(profileParam ? {lastName: profileParam.lastName} : {}),
+            ...(profileParam ? {birthDate: profileParam.birthDate} : {}),
+            ...(profileParam ? {country: profileParam.country} : {}),
+            locale,
+            ...(onboardingParam ? {onboarding: onboardingParam} : {}),
+          });
         } catch {}
       }
       // El token activa la navegación a Main automáticamente.
@@ -76,10 +85,11 @@ export default function AuthScreen({navigation, route}: any) {
   };
 
   return (
-    <Sky variant="day">
+    <Sky variant="day" testID={step === 'email' ? 'screen-auth-email' : 'screen-auth-code'}>
       <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={[styles.wrap, {paddingTop: insets.top + 20, paddingBottom: insets.bottom + 28}]}>
           <IconButton
+            testID="auth-back"
             name="arrowLeft"
             size={38}
             onPress={() => (step === 'code' ? setStep('email') : navigation.goBack())}
@@ -93,18 +103,9 @@ export default function AuthScreen({navigation, route}: any) {
                 {en ? 'A serene place to meet Him each day.' : 'Un lugar sereno para encontrarte con Él cada día.'}
               </Text>
 
-              <Text style={styles.label}>{en ? 'NAME (OPTIONAL)' : 'NOMBRE (OPCIONAL)'}</Text>
-              <TextInput
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder={en ? 'Your name' : 'Tu nombre'}
-                placeholderTextColor={colors.sand}
-                style={styles.input}
-                autoCapitalize="words"
-              />
-
               <Text style={styles.label}>{en ? 'EMAIL' : 'CORREO'}</Text>
               <TextInput
+                testID="auth-email-input"
                 value={email}
                 onChangeText={setEmail}
                 placeholder="tu@correo.com"
@@ -116,7 +117,7 @@ export default function AuthScreen({navigation, route}: any) {
               />
 
               <View style={{marginTop: 16}}>
-                <Button variant="primary" fullWidth loading={busy} onPress={sendCode}>
+                <Button testID="auth-send-code" variant="primary" fullWidth loading={busy} onPress={sendCode}>
                   {en ? 'Send me a code' : 'Enviarme un código'}
                 </Button>
               </View>
@@ -142,6 +143,7 @@ export default function AuthScreen({navigation, route}: any) {
 
               <Text style={styles.label}>{en ? 'CODE' : 'CÓDIGO'}</Text>
               <TextInput
+                testID="auth-code-input"
                 value={code}
                 onChangeText={setCode}
                 placeholder="••••••"
@@ -150,15 +152,15 @@ export default function AuthScreen({navigation, route}: any) {
                 keyboardType="number-pad"
                 maxLength={6}
               />
-              {hint && <Text style={styles.hint}>{hint}</Text>}
+              {hint && <Text testID="auth-dev-code" style={styles.hint}>{hint}</Text>}
 
               <View style={{marginTop: 16}}>
-                <Button variant="primary" fullWidth loading={busy} onPress={verify}>
+                <Button testID="auth-verify" variant="primary" fullWidth loading={busy} onPress={verify}>
                   {en ? 'Enter' : 'Entrar'}
                 </Button>
               </View>
 
-              <Pressable onPress={sendCode} style={styles.resend}>
+              <Pressable testID="auth-resend" onPress={sendCode} style={styles.resend}>
                 <Text style={styles.resendText}>{en ? 'Resend code' : 'Reenviar código'}</Text>
               </Pressable>
             </>
@@ -171,7 +173,7 @@ export default function AuthScreen({navigation, route}: any) {
 
 function SocialButton({icon, label}: {icon: 'apple' | 'google'; label: string}) {
   return (
-    <View style={styles.social}>
+    <View testID={`auth-sso-${icon}`} style={styles.social}>
       <Icon name={icon} size={20} color={colors.ink} />
       <Text style={styles.socialText}>{label}</Text>
     </View>

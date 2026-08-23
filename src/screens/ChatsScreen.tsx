@@ -63,11 +63,11 @@ export default function ChatsScreen({navigation}: any) {
   const openNew = () => navigation.navigate('Conversation', {new: true});
 
   return (
-    <Sky variant="day" scroll contentStyle={{paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 60}}>
+    <Sky testID="screen-chats" variant="day" scroll contentStyle={{paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: 60}}>
       <View style={styles.header}>
-        <IconButton name="arrowLeft" onPress={() => navigation.goBack()} />
+        <IconButton testID="chats-back" name="arrowLeft" onPress={() => navigation.goBack()} />
         <Text style={styles.headerTitle}>{T.conversations.toUpperCase()}</Text>
-        <IconButton name="plus" color="#fff" bg={colors.skyDeep} onPress={openNew} />
+        <IconButton testID="chats-new" name="plus" color="#fff" bg={colors.skyDeep} onPress={openNew} />
       </View>
 
       <Text style={styles.h1}>{T.yourChats}</Text>
@@ -75,6 +75,7 @@ export default function ChatsScreen({navigation}: any) {
       <View style={styles.search}>
         <Icon name="search" size={17} color={colors.earth} />
         <TextInput
+          testID="chats-search-input"
           value={q}
           onChangeText={setQ}
           placeholder={T.search}
@@ -83,7 +84,7 @@ export default function ChatsScreen({navigation}: any) {
         />
       </View>
 
-      <CloudCard onPress={openNew} style={styles.newCard}>
+      <CloudCard testID="chats-new-card" onPress={openNew} style={styles.newCard}>
         <View style={styles.newIcon}>
           <Icon name="plus" size={20} color={colors.skyDeep} />
         </View>
@@ -101,6 +102,7 @@ export default function ChatsScreen({navigation}: any) {
             {grp.items.map(c => (
               <CloudCard
                 key={c._id}
+                testID={`chats-item-${c._id}`}
                 onPress={() => navigation.navigate('Conversation', {conversationId: c._id, title: c.title})}
                 style={styles.item}>
                 <View style={styles.itemIcon}>
@@ -118,7 +120,7 @@ export default function ChatsScreen({navigation}: any) {
       ))}
 
       {!groups.length && (
-        <Text style={styles.empty}>
+        <Text testID="chats-empty" style={styles.empty}>
           {q.trim()
             ? en
               ? `No conversations for "${q}".`

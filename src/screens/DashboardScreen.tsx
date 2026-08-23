@@ -73,7 +73,7 @@ export default function DashboardScreen({navigation, switchTab}: any) {
   const openTask = () => switchTab('home', 'tarea');
 
   return (
-    <Sky variant="day" scroll contentStyle={{paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 150}}>
+    <Sky testID="screen-dashboard" variant="day" scroll contentStyle={{paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 150}}>
       {/* saludo */}
       <View style={styles.greetRow}>
         <View style={{flex: 1}}>
@@ -91,14 +91,18 @@ export default function DashboardScreen({navigation, switchTab}: any) {
           cuando se decida dónde colocarlos:
             <IconButton name="bell" onPress={() => navigation.navigate('Notifications')} />
         */}
-        <IconButton name="settings" onPress={() => navigation.navigate('Settings')} />
-        <IconButton name="logout" onPress={confirmLogout} />
+        <IconButton testID="dashboard-settings" name="settings" onPress={() => navigation.navigate('Settings')} />
+        <IconButton testID="dashboard-logout" name="logout" onPress={confirmLogout} />
       </View>
 
       {/* accesos rápidos */}
       <View style={styles.quickRow}>
         {accesos.map(a => (
-          <Pressable key={a.id} onPress={a.go} style={[styles.quick, {backgroundColor: a.bg}]}>
+          <Pressable
+            key={a.id}
+            testID={`dashboard-quick-${a.id}`}
+            onPress={a.go}
+            style={[styles.quick, {backgroundColor: a.bg}]}>
             <View style={styles.quickIcon}>
               <Icon name={a.icon} size={19} color={a.fg} />
             </View>
@@ -111,13 +115,13 @@ export default function DashboardScreen({navigation, switchTab}: any) {
       </View>
 
       {/* racha con semana */}
-      <CloudCard onPress={() => navigation.navigate('Streak')} style={{marginBottom: 14}}>
+      <CloudCard testID="dashboard-streak" onPress={() => navigation.navigate('Streak')} style={{marginBottom: 14}}>
         <View style={styles.streakHead}>
           <View style={styles.flameBox}>
             <Icon name="flame" size={24} color="#fff" />
           </View>
           <View style={{flex: 1}}>
-            <Text style={styles.streakBig}>
+            <Text testID="dashboard-streak-count" style={styles.streakBig}>
               {racha} {locale === 'en' ? 'days of the path' : 'días de camino'}
             </Text>
             <Text style={styles.streakSub}>
@@ -148,13 +152,13 @@ export default function DashboardScreen({navigation, switchTab}: any) {
       </CloudCard>
 
       {/* tarea del día */}
-      <Pressable onPress={openTask} style={styles.task}>
+      <Pressable testID="dashboard-task" onPress={openTask} style={styles.task}>
         <View style={styles.taskHead}>
           <Icon name="feather" size={17} color={colors.rose} />
           <Text style={styles.taskKicker}>{T.taskOfDay.toUpperCase()}</Text>
         </View>
         {/* Sin texto inventado de reserva: mientras no cargue el día, en blanco. */}
-        <Text style={styles.taskText}>{entry ? L(entry.task.prompt, locale) : ''}</Text>
+        <Text testID="dashboard-task-prompt" style={styles.taskText}>{entry ? L(entry.task.prompt, locale) : ''}</Text>
         <View style={styles.taskCta}>
           <Text style={styles.taskCtaText}>{T.writeReflection}</Text>
           <Icon name="arrowRight" size={15} color="#fff" />
@@ -164,7 +168,7 @@ export default function DashboardScreen({navigation, switchTab}: any) {
       {/* recursos anteriores */}
       <View style={styles.sectionHead}>
         <Text style={styles.sectionTitle}>{T.resources.toUpperCase()}</Text>
-        <Pressable onPress={() => navigation.navigate('Devocionales')}>
+        <Pressable testID="dashboard-see-all" onPress={() => navigation.navigate('Devocionales')}>
           <Text style={styles.sectionLink}>{T.seeAll}</Text>
         </Pressable>
       </View>
@@ -172,6 +176,7 @@ export default function DashboardScreen({navigation, switchTab}: any) {
         {recent.map(r => (
           <CloudCard
             key={r._id}
+            testID={`dashboard-resource-${r._id}`}
             onPress={() => navigation.navigate('Lesson', {devotionalId: r._id})}
             style={styles.resource}>
             <View style={styles.resourceIcon}>
@@ -179,7 +184,7 @@ export default function DashboardScreen({navigation, switchTab}: any) {
             </View>
             <View style={{flex: 1}}>
               <Text style={styles.resourceMeta} numberOfLines={1}>
-                {r.reference} · {typeLabel(r.type, locale)}
+                {L(r.reference, locale)} · {typeLabel(r.type, locale)}
               </Text>
               <Text style={styles.resourceTitle} numberOfLines={1}>
                 {L(r.quote, locale).replace(/[""]/g, '')}

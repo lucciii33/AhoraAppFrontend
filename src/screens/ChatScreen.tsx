@@ -182,10 +182,10 @@ export default function ChatScreen({navigation, route, switchTab}: any) {
   const goBack = () => (switchTab ? switchTab('home') : navigation.goBack());
 
   return (
-    <Sky variant="soft" clouds={false}>
+    <Sky testID="screen-chat" variant="soft" clouds={false}>
       {/* header */}
       <View style={[styles.header, {paddingTop: insets.top + 8}]}>
-        <IconButton name="arrowLeft" onPress={goBack} />
+        <IconButton testID="chat-back" name="arrowLeft" onPress={goBack} />
         <View style={styles.avatar}>
           <Svg width={20} height={20} viewBox="0 0 64 64">
             <Circle cx="32" cy="32" r="15" fill="none" stroke={colors.skyDeep} strokeWidth="2.4" />
@@ -193,10 +193,10 @@ export default function ChatScreen({navigation, route, switchTab}: any) {
           </Svg>
         </View>
         <View style={{flex: 1}}>
-          <Text style={styles.title} numberOfLines={1}>{title}</Text>
+          <Text testID="chat-title" style={styles.title} numberOfLines={1}>{title}</Text>
           <Text style={styles.subtitle}>{locale === 'en' ? 'Jesus walks with you' : 'Jesús camina contigo'}</Text>
         </View>
-        <IconButton name="list" onPress={() => navigation.navigate('Chats')} />
+        <IconButton testID="chat-list" name="list" onPress={() => navigation.navigate('Chats')} />
       </View>
 
       <KeyboardAvoidingView
@@ -219,7 +219,10 @@ export default function ChatScreen({navigation, route, switchTab}: any) {
           {messages.map((m, i) => {
             const mine = m.role === 'user';
             return (
-              <View key={i} style={[styles.row, {justifyContent: mine ? 'flex-end' : 'flex-start'}]}>
+              <View
+                key={i}
+                testID={`chat-message-${mine ? 'user' : 'bot'}-${i}`}
+                style={[styles.row, {justifyContent: mine ? 'flex-end' : 'flex-start'}]}>
                 <View
                   style={[
                     styles.bubble,
@@ -234,11 +237,12 @@ export default function ChatScreen({navigation, route, switchTab}: any) {
           {sending && <TypingDots />}
         </ScrollView>
 
-        {error && <Text style={styles.error}>{error}</Text>}
+        {error && <Text testID="chat-error" style={styles.error}>{error}</Text>}
 
         {/* entrada */}
         <View style={[styles.inputBar, {marginBottom: bottomGap}]}>
           <TextInput
+            testID="chat-input"
             value={text}
             onChangeText={setText}
             placeholder={T.writeHere}
@@ -248,6 +252,7 @@ export default function ChatScreen({navigation, route, switchTab}: any) {
             returnKeyType="send"
           />
           <Pressable
+            testID="chat-send"
             onPress={send}
             disabled={sending || !text.trim()}
             style={[styles.sendBtn, (sending || !text.trim()) && {opacity: 0.45}]}>

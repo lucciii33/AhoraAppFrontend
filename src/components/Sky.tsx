@@ -43,6 +43,7 @@ export function Sky({
   children,
   contentStyle,
   scrollRef,
+  testID,
 }: {
   variant?: 'dawn' | 'day' | 'soft' | 'reading' | 'night';
   scroll?: boolean;
@@ -51,9 +52,11 @@ export function Sky({
   contentStyle?: StyleProp<ViewStyle>;
   // Deja que la pantalla controle el scroll (p. ej. bajar a una estación).
   scrollRef?: React.RefObject<ScrollView | null>;
+  // Identificador de la pantalla para las pruebas de extremo a extremo.
+  testID?: string;
 }) {
   return (
-    <View style={styles.root}>
+    <View style={styles.root} testID={testID}>
       <GradientBackground variant={variant} />
       {clouds && <Clouds />}
       {scroll ? (

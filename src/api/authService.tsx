@@ -5,6 +5,9 @@ export interface AuthUser {
   firstName: string;
   lastName?: string;
   email: string;
+  birthDate?: string | null; // ISO; la app la muestra, no la recalcula
+  age?: number | null; // la calcula el backend desde birthDate
+  country?: string;
   locale: 'es' | 'en';
   onboarding?: {
     completed?: boolean;
@@ -65,6 +68,9 @@ export const authService = {
 
   updateMe: async (payload: {
     firstName?: string;
+    lastName?: string;
+    birthDate?: string | null;
+    country?: string;
     locale?: 'es' | 'en';
     onboarding?: AuthUser['onboarding'];
   }): Promise<AuthUser> => {

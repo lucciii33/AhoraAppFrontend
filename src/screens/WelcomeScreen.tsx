@@ -14,7 +14,7 @@ export default function WelcomeScreen({navigation}: any) {
   const en = locale === 'en';
 
   return (
-    <Sky variant="dawn">
+    <Sky variant="dawn" testID="screen-welcome">
       <View style={[styles.wrap, {paddingTop: insets.top + 24, paddingBottom: insets.bottom + 32}]}>
         <View style={styles.brand}>
           <Icon name="sun" size={18} color={colors.sky} />
@@ -35,13 +35,17 @@ export default function WelcomeScreen({navigation}: any) {
 
         <View style={{gap: 12}}>
           <Button
+            testID="welcome-start"
             variant="primary"
             fullWidth
             onPress={() => navigation.navigate('Onboarding')}
             iconRight={<Icon name="arrowRight" size={18} color="#fff" />}>
             {en ? 'Start my path' : 'Comenzar mi camino'}
           </Button>
-          <Pressable onPress={() => navigation.navigate('Auth')} style={styles.link}>
+          <Pressable
+            testID="welcome-login"
+            onPress={() => navigation.navigate('Auth')}
+            style={styles.link}>
             <Text style={styles.linkText}>
               {en ? 'I already have an account' : 'Ya tengo una cuenta'}
             </Text>

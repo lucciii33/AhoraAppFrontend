@@ -53,12 +53,13 @@ export default function LessonScreen({navigation, route, switchTab}: any) {
   const goChat = () => (switchTab ? switchTab('chat') : navigation.navigate('Conversation', {}));
 
   return (
-    <Sky variant="reading" scroll clouds={false} contentStyle={{paddingBottom: 150}}>
+    <Sky testID="screen-lesson" variant="reading" scroll clouds={false} contentStyle={{paddingBottom: 150}}>
       {/* barra superior */}
       <View style={[styles.topbar, {paddingTop: insets.top + 8}]}>
-        <IconButton name="arrowLeft" onPress={goBack} />
+        <IconButton testID="lesson-back" name="arrowLeft" onPress={goBack} />
         <Text style={styles.topTitle}>{T.reflectionOfDay.toUpperCase()}</Text>
         <IconButton
+          testID="lesson-bookmark"
           name="bookmark"
           color={saved ? colors.skyDeep : colors.earth}
           onPress={() => setSaved(s => !s)}
@@ -68,14 +69,14 @@ export default function LessonScreen({navigation, route, switchTab}: any) {
       {loading ? (
         <ActivityIndicator color={colors.skyDeep} style={{marginTop: 60}} />
       ) : !dev ? (
-        <Text style={styles.empty}>{locale === 'en' ? 'No devotional available.' : 'No hay devocional disponible.'}</Text>
+        <Text testID="lesson-empty" style={styles.empty}>{locale === 'en' ? 'No devotional available.' : 'No hay devocional disponible.'}</Text>
       ) : (
         <View style={styles.content}>
           <Text style={styles.meta}>
             {fechaHoy(locale)}  ·  {dev.readingMinutes} {T.minRead}
           </Text>
 
-          <Text style={styles.title}>{L(dev.quote, locale)}</Text>
+          <Text testID="lesson-title" style={styles.title}>{L(dev.quote, locale)}</Text>
 
           {/* imagen placeholder o real */}
           <View style={styles.image}>
@@ -105,6 +106,7 @@ export default function LessonScreen({navigation, route, switchTab}: any) {
 
           <View style={{marginTop: 22}}>
             <Button
+              testID="lesson-go-chat"
               variant="primary"
               fullWidth
               onPress={goChat}

@@ -30,6 +30,9 @@ interface AuthContextValue {
   verifyCode: (payload: {email: string; code: string}) => Promise<void>;
   updateProfile: (payload: {
     firstName?: string;
+    lastName?: string;
+    birthDate?: string | null;
+    country?: string;
     locale?: Locale;
     onboarding?: AuthUser['onboarding'];
   }) => Promise<void>;
@@ -110,6 +113,9 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
   const updateProfile = useCallback(
     async (payload: {
       firstName?: string;
+      lastName?: string;
+      birthDate?: string | null;
+      country?: string;
       locale?: Locale;
       onboarding?: AuthUser['onboarding'];
     }) => {

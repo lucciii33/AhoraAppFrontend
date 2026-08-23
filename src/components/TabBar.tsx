@@ -34,7 +34,11 @@ export function TabBar({
           const on = active === tab.id;
           const color = on ? colors.skyDeep : colors.earth;
           return (
-            <Pressable key={tab.id} onPress={() => onTab(tab.id)} style={styles.item}>
+            <Pressable
+              key={tab.id}
+              testID={`tab-${tab.id}`}
+              onPress={() => onTab(tab.id)}
+              style={styles.item}>
               <Icon name={tab.icon} size={21} color={color} strokeWidth={on ? 1.9 : 1.5} />
               <Text style={[styles.label, {color, fontWeight: on ? '700' : '500'}]}>
                 {locale === 'en' ? tab.en : tab.es}

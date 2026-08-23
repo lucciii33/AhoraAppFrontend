@@ -51,11 +51,11 @@ export default function StreakScreen({navigation}: any) {
   };
 
   return (
-    <Sky variant="day" scroll contentStyle={{paddingTop: insets.top + 8, paddingHorizontal: 22, paddingBottom: 60}}>
+    <Sky testID="screen-streak" variant="day" scroll contentStyle={{paddingTop: insets.top + 8, paddingHorizontal: 22, paddingBottom: 60}}>
       <View style={styles.header}>
-        <IconButton name="arrowLeft" onPress={() => navigation.goBack()} />
+        <IconButton testID="streak-back" name="arrowLeft" onPress={() => navigation.goBack()} />
         <Text style={styles.headerTitle}>{T.yourPath.toUpperCase()}</Text>
-        <IconButton name="settings" onPress={() => {}} />
+        <IconButton testID="streak-settings" name="settings" onPress={() => {}} />
       </View>
 
       {/* anillo */}
@@ -76,7 +76,7 @@ export default function StreakScreen({navigation}: any) {
           />
         </Svg>
         <View style={styles.ringCenter}>
-          <Text style={styles.ringNumber}>{current}</Text>
+          <Text testID="streak-count" style={styles.ringNumber}>{current}</Text>
           <Text style={styles.ringLabel}>{T.days.toUpperCase()}</Text>
         </View>
       </View>
@@ -121,7 +121,7 @@ export default function StreakScreen({navigation}: any) {
       {/* devocionales anteriores */}
       <View style={styles.sectionHead}>
         <Text style={styles.sectionTitle}>{T.prevDevotionals.toUpperCase()}</Text>
-        <Pressable onPress={() => navigation.navigate('Devocionales')} style={styles.link}>
+        <Pressable testID="streak-see-all" onPress={() => navigation.navigate('Devocionales')} style={styles.link}>
           <Text style={styles.linkText}>{T.seeAllM}</Text>
           <Icon name="arrowRight" size={14} color={colors.skyDeep} />
         </Pressable>
@@ -130,6 +130,7 @@ export default function StreakScreen({navigation}: any) {
         {prev.map((a, i) => (
           <CloudCard
             key={a._id}
+            testID={`streak-devotional-${a._id}`}
             onPress={() => navigation.navigate('Lesson', {devotionalId: a._id})}
             style={styles.item}>
             <View style={styles.itemIcon}>
@@ -137,7 +138,7 @@ export default function StreakScreen({navigation}: any) {
             </View>
             <View style={{flex: 1}}>
               <Text style={styles.itemTitle} numberOfLines={1}>{L(a.quote, locale).replace(/[""]/g, '')}</Text>
-              <Text style={styles.itemRef}>{a.reference}</Text>
+              <Text style={styles.itemRef}>{L(a.reference, locale)}</Text>
             </View>
             <Text style={styles.itemWhen}>{whenLabel(i)}</Text>
           </CloudCard>

@@ -1,0 +1,88 @@
+appId: org.reactjs.native.example.Ahora
+---
+- clearState
+- launchApp
+
+# Bienvenida
+- assertVisible:
+    id: 'welcome-start'
+- tapOn:
+    id: 'welcome-start'
+
+# Paso 1 · idioma (tocar avanza solo, no hay botón de continuar)
+- assertVisible:
+    id: 'screen-onboarding-1'
+- tapOn:
+    id: 'onboarding-lang-en'
+
+# Paso 2 · datos. Que el título esté en inglés prueba que el idioma cambió.
+- assertVisible:
+    id: 'screen-onboarding-2'
+- assertVisible: 'Tell us\nabout you'
+- tapOn:
+    id: 'onboarding-firstname-input'
+- inputText: 'Angelo'
+- tapOn:
+    id: 'onboarding-lastname-input'
+- inputText: 'Maiele'
+- tapOn:
+    id: 'onboarding-continue'
+
+# Paso 3 · qué entregar. 'ansiedad' ya viene marcada de fábrica: tocarla la
+# apagaría. Solo añadimos 'enojo'.
+- assertVisible:
+    id: 'screen-onboarding-3'
+- tapOn:
+    id: 'onboarding-chip-enojo'
+- assertVisible:
+    id: 'onboarding-chip-ansiedad'
+    selected: true
+- assertVisible:
+    id: 'onboarding-chip-enojo'
+    selected: true
+- tapOn:
+    id: 'onboarding-continue'
+
+# Paso 4 · hora del recordatorio
+- assertVisible:
+    id: 'screen-onboarding-4'
+- scrollUntilVisible:
+    element:
+      id: 'onboarding-time-07:00'
+- tapOn:
+    id: 'onboarding-time-07:00'
+- tapOn:
+    id: 'onboarding-continue'
+
+# Paso 5 · crear la cuenta
+- assertVisible:
+    id: 'screen-onboarding-5'
+- tapOn:
+    id: 'onboarding-create'
+
+# Correo nuevo en cada corrida: si no, a partir de la segunda ya no estaríamos
+# registrando a nadie, solo reusando el usuario de la vez anterior.
+- assertVisible:
+    id: 'screen-auth-email'
+- evalScript: ${output.email = 'test-' + Date.now() + '@ahora.app'}
+- tapOn:
+    id: 'auth-email-input'
+- inputText: ${output.email}
+- tapOn:
+    id: 'auth-send-code'
+
+# El código lo pide el test a la API, no lo lee de la pantalla.
+- assertVisible:
+    id: 'screen-auth-code'
+- runScript: ../scripts/getLoginCode.js
+- tapOn:
+    id: 'auth-code-input'
+- inputText: ${output.code}
+- tapOn:
+    id: 'auth-verify'
+
+# Con token, la app entra sola al panel
+- assertVisible:
+    id: 'screen-dashboard'
+- assertVisible:
+    id: 'dashboard-task'

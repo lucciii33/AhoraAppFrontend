@@ -7,7 +7,7 @@ export interface Devotional {
   _id: string;
   dayNumber: number;
   quote: LText;
-  reference: string;
+  reference: LText;
   readingMinutes: number;
   imageUrl?: string;
   body: LText[];

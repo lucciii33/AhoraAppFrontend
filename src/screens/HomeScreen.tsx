@@ -97,6 +97,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
 
   return (
     <Sky
+      testID="screen-home"
       variant="day"
       scroll
       scrollRef={scroller}
@@ -110,9 +111,9 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
             {user?.firstName || (locale === 'en' ? 'friend' : 'amiga')}.
           </Text>
         </View>
-        <Pressable onPress={() => navigation.navigate('Streak')} style={styles.streakPill}>
+        <Pressable testID="home-streak" onPress={() => navigation.navigate('Streak')} style={styles.streakPill}>
           <Icon name="sun" size={16} color={colors.rose} />
-          <Text style={styles.streakPillText}>{streakCount}</Text>
+          <Text testID="home-streak-count" style={styles.streakPillText}>{streakCount}</Text>
         </Pressable>
       </View>
 
@@ -121,13 +122,14 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, {width: `${(hechas / total) * 100}%`}]} />
         </View>
-        <Text style={styles.progressLabel}>
+        <Text testID="home-progress" style={styles.progressLabel}>
           {hechas}/{total}
         </Text>
       </View>
 
       {/* estaciones */}
       <Station
+        testID="home-station-oracion"
         time={locale === 'en' ? 'Sunrise · Morning prayer' : 'Amanecer · Oración de la mañana'}
         icon="sun"
         accent={colors.rose}
@@ -138,6 +140,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
         </Text>
         {!done('oracion') && (
           <LinkAction
+            testID="home-mark-oracion"
             label={locale === 'en' ? 'Mark as prayed' : 'Marcar como orada'}
             icon="check"
             color={colors.roseInk}
@@ -147,6 +150,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
       </Station>
 
       <Station
+        testID="home-station-reflexion"
         time={locale === 'en' ? 'Morning · Reflection of the day' : 'Mañana · Reflexión del día'}
         icon="book"
         accent={colors.skyDeep}
@@ -154,6 +158,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
         title={locale === 'en' ? 'How we see the day' : 'Cómo miramos el día'}>
         <Text style={styles.body}>{entry ? line(entry.reflection.summary) : ''}</Text>
         <LinkAction
+          testID="home-mark-reflexion"
           label={locale === 'en' ? 'Read the reflection' : 'Leer la reflexión'}
           icon="arrowRight"
           color={colors.skyDeep}
@@ -165,6 +170,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
       </Station>
 
       <Station
+        testID="home-station-practica"
         time={locale === 'en' ? 'Midday · Practice of the day' : 'Mediodía · Práctica del día'}
         icon="wind"
         accent={colors.rose}
@@ -176,6 +182,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
         )}
         {!done('practica') && (
           <LinkAction
+            testID="home-mark-practica"
             label={locale === 'en' ? 'Done' : 'Hecho'}
             icon="check"
             color={colors.roseInk}
@@ -188,6 +195,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
       <View onLayout={e => medirTarea(e.nativeEvent.layout.y)}>
         <Animated.View pointerEvents="none" style={[styles.halo, {opacity: halo}]} />
         <Station
+          testID="home-station-tarea"
           time={locale === 'en' ? 'Afternoon · Task of the day' : 'Tarde · Tarea del día'}
           icon="feather"
           accent={colors.skyDeep}
@@ -195,6 +203,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
           title={entry ? line(entry.task.title) : locale === 'en' ? 'A look at the past' : 'Una mirada al pasado'}>
           <Text style={[styles.body, {marginBottom: 12}]}>{entry ? line(entry.task.prompt) : ''}</Text>
           <TextInput
+            testID="home-task-input"
             value={taskText}
             onChangeText={setTaskText}
             placeholder={locale === 'en' ? 'Write here…' : 'Escribe aquí…'}
@@ -204,6 +213,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
           />
           {!done('tarea') && (
             <LinkAction
+              testID="home-mark-tarea"
               label={locale === 'en' ? 'Save my reflection' : 'Guardar mi reflexión'}
               icon="check"
               color={colors.skyDeep}
@@ -214,6 +224,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
       </View>
 
       <Station
+        testID="home-station-recordatorio"
         time={locale === 'en' ? 'Night · Reminder of the day' : 'Noche · Recordatorio del día'}
         icon="moon"
         accent={colors.rose}
@@ -223,6 +234,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
         <Text style={styles.quote}>{entry ? line(entry.nightReminder.text) : ''}</Text>
         {!done('recordatorio') && (
           <LinkAction
+            testID="home-mark-recordatorio"
             label={locale === 'en' ? 'Keep in my heart' : 'Guardar en el corazón'}
             icon="heart"
             color={colors.roseInk}
@@ -232,7 +244,7 @@ export default function HomeScreen({navigation, switchTab, focus}: any) {
       </Station>
 
       {/* companion */}
-      <Pressable onPress={() => switchTab('chat')} style={styles.companion}>
+      <Pressable testID="home-companion" onPress={() => switchTab('chat')} style={styles.companion}>
         <View style={styles.companionIcon}>
           <Icon name="chat" size={22} color="#fff" />
         </View>

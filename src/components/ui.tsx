@@ -18,15 +18,24 @@ export function CloudCard({
   children,
   style,
   onPress,
+  testID,
 }: {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  testID?: string;
 }) {
-  const inner = <View style={[styles.card, style]}>{children}</View>;
+  const inner = (
+    <View style={[styles.card, style]} testID={onPress ? undefined : testID}>
+      {children}
+    </View>
+  );
   if (!onPress) return inner;
   return (
-    <Pressable onPress={onPress} style={({pressed}) => (pressed ? styles.pressed : undefined)}>
+    <Pressable
+      onPress={onPress}
+      testID={testID}
+      style={({pressed}) => (pressed ? styles.pressed : undefined)}>
       {inner}
     </Pressable>
   );
@@ -46,6 +55,7 @@ export function Button({
   fullWidth,
   loading,
   style,
+  testID,
 }: {
   children?: React.ReactNode;
   onPress?: () => void;
@@ -56,6 +66,7 @@ export function Button({
   fullWidth?: boolean;
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }) {
   const v = variantStyles[variant];
   const s = sizeStyles[size];
@@ -63,6 +74,7 @@ export function Button({
     <Pressable
       onPress={onPress}
       disabled={loading}
+      testID={testID}
       style={({pressed}) => [
         styles.btn,
         s.btn,
@@ -96,6 +108,7 @@ export function IconButton({
   bg = 'rgba(255,255,255,0.7)',
   size = 40,
   style,
+  testID,
 }: {
   name: IconName;
   onPress?: () => void;
@@ -103,10 +116,12 @@ export function IconButton({
   bg?: string;
   size?: number;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }) {
   return (
     <Pressable
       onPress={onPress}
+      testID={testID}
       style={({pressed}) => [
         styles.iconBtn,
         {width: size, height: size, backgroundColor: bg},
@@ -176,6 +191,7 @@ export function Station({
   done,
   isLast,
   children,
+  testID,
 }: {
   time: string;
   icon: IconName;
@@ -184,12 +200,14 @@ export function Station({
   done?: boolean;
   isLast?: boolean;
   children?: React.ReactNode;
+  testID?: string;
 }) {
   return (
-    <View style={styles.station}>
+    <View style={styles.station} testID={testID}>
       {/* riel */}
       <View style={styles.rail}>
         <View
+          testID={done && testID ? `${testID}-done` : undefined}
           style={[
             styles.railDot,
             {backgroundColor: done ? accent : 'rgba(255,255,255,0.85)'},
@@ -217,14 +235,19 @@ export function LinkAction({
   icon = 'check',
   color = colors.roseInk,
   onPress,
+  testID,
 }: {
   label: string;
   icon?: IconName;
   color?: string;
   onPress?: () => void;
+  testID?: string;
 }) {
   return (
-    <Pressable onPress={onPress} style={({pressed}) => [styles.linkAction, pressed && {opacity: 0.6}]}>
+    <Pressable
+      onPress={onPress}
+      testID={testID}
+      style={({pressed}) => [styles.linkAction, pressed && {opacity: 0.6}]}>
       <Text style={[styles.linkText, {color}]}>{label}</Text>
       <Icon name={icon} size={15} color={color} />
     </Pressable>
