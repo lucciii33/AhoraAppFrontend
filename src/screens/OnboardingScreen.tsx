@@ -16,6 +16,7 @@ import {Button, IconButton, RisingSun} from '../components/ui';
 import {colors, font} from '../theme';
 import {useAuth} from '../context/AuthContext';
 import {Locale} from '../i18n';
+import {pedirPermiso, crearCanal} from '../services/push';
 
 // Onboarding — cuatro pasos serenos antes de crear la cuenta.
 // El primero es el idioma: todo lo que viene después ya se ve en él.
@@ -112,6 +113,31 @@ export default function OnboardingScreen({navigation}: any) {
     setStep(2);
   };
 
+  // Paso 4: elegida la hora, pedimos el permiso del sistema. Es el momento en
+  // que la persona entiende para qué es — acaba de decir a qué hora quiere que
+  // le avisemos —, así que el diálogo no llega de la nada.
+  //
+  // Un "no" no bloquea nada: se sigue igual y la hora se guarda. El teléfono
+  // simplemente no se registra, y en cuanto den el permiso desde los ajustes
+  // del sistema, el próximo arranque de la app lo registra solo.
+  const pedirPermisoDeAvisos = async () => {
+    try {
+      const concedido = await pedirPermiso();
+      if (concedido) {
+        await crearCanal(locale);
+        return;
+      }
+      Alert.alert(
+        en ? 'No pasa nada' : 'No pasa nada',
+        en
+          ? 'We will keep your time saved. You can turn reminders on later from your phone settings.'
+          : 'Guardamos tu hora igual. Puedes activar los recordatorios más tarde desde los ajustes de tu teléfono.',
+      );
+    } catch {
+      // El permiso es un extra: si el sistema falla, el onboarding sigue.
+    }
+  };
+
   const onNext = async () => {
     if (step === 2) {
       if (!firstName.trim()) {
@@ -131,6 +157,8 @@ export default function OnboardingScreen({navigation}: any) {
         return;
       }
     }
+    if (step === 4) await pedirPermisoDeAvisos();
+
     if (step < TOTAL_STEPS) {
       setStep(step + 1);
     } else {

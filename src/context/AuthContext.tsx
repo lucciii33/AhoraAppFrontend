@@ -10,6 +10,11 @@ import React, {
 import {authService, AuthUser, RequestCodeResult} from '../api/authService';
 import {setAuthToken} from '../api/client';
 import {Locale} from '../i18n';
+import {
+  registrarDispositivo,
+  darDeBajaDispositivo,
+  escucharPush,
+} from '../services/push';
 
 const TOKEN_KEY = 'ahora.auth.token';
 const USER_KEY = 'ahora.auth.user';
@@ -146,6 +151,11 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
   );
 
   const logout = useCallback(async () => {
+    // Primero la baja del teléfono, que necesita el token para autenticarse.
+    // Si se hiciera después, la petición saldría sin cabecera y este aparato
+    // seguiría recibiendo los recordatorios de quien acaba de salir.
+    await darDeBajaDispositivo();
+
     setAuthToken(null);
     setUserState(null);
     setToken(null);
@@ -154,6 +164,20 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       AsyncStorage.removeItem(USER_KEY),
     ]);
   }, []);
+
+  // Push: con la sesión abierta, registramos el teléfono y escuchamos.
+  //
+  // Aquí NO se pide permiso (`pedir` va en false): si ya está concedido se
+  // refresca el token y la zona horaria — que cambian solos, el primero
+  // porque FCM lo rota y la segunda porque la persona viaja —, y si no, se
+  // deja en paz. El permiso se pide en el onboarding, que es donde la persona
+  // acaba de elegir su hora y el diálogo tiene sentido.
+  const localeActivo = (user?.locale as Locale) || pickedLocale;
+  useEffect(() => {
+    if (!token) return;
+    registrarDispositivo(localeActivo);
+    return escucharPush(localeActivo);
+  }, [token, localeActivo]);
 
   const completeOnboarding = useCallback(async () => {
     setOnboardingSeen(true);
@@ -166,7 +190,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       token,
       loading,
       onboardingSeen,
-      locale: (user?.locale as Locale) || pickedLocale,
+      locale: localeActivo,
       requestCode,
       verifyCode,
       updateProfile,
@@ -175,7 +199,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
       logout,
       completeOnboarding,
     }),
-    [user, token, loading, onboardingSeen, pickedLocale, requestCode, verifyCode, updateProfile, setUser, setLocale, logout, completeOnboarding],
+    [user, token, loading, onboardingSeen, localeActivo, requestCode, verifyCode, updateProfile, setUser, setLocale, logout, completeOnboarding],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

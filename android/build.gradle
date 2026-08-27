@@ -15,6 +15,9 @@ buildscript {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        // Lee android/app/google-services.json y genera la configuración de
+        // Firebase en tiempo de compilación. Sin ese fichero, la build falla.
+        classpath("com.google.gms:google-services:4.4.2")
     }
 }
 

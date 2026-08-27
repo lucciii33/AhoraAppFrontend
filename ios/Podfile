@@ -16,8 +16,30 @@ unless linkage.nil?
   use_frameworks! linkage: linkage.to_sym
 end
 
+# react-native-firebase v26 resuelve el SDK de Firebase por Swift Package
+# Manager, y sus productos son librerías automáticas: con el enlazado estático
+# que usa React Native 0.82 cada pod acaba embebiendo su propia copia y el
+# enlazador se queja de símbolos duplicados. Volviendo a los pods clásicos de
+# Firebase (que sí saben convivir en estático) se resuelve, y no perdemos nada:
+# es la ruta que react-native-firebase ha usado siempre.
+$RNFirebaseDisableSPM = true
+
 target 'Ahora' do
   config = use_native_modules!
+
+  # Los pods de Firebase escritos en Swift necesitan importar estos, que son
+  # Objective-C sin module map propio. En enlazado estático eso no compila a
+  # menos que se les pida generar el module map. Es el arreglo que documenta
+  # react-native-firebase; se listan uno a uno en vez de poner
+  # `use_modular_headers!` global para no cambiarle las reglas al resto de
+  # pods del proyecto.
+  pod 'GoogleUtilities', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'FirebaseCoreExtension', :modular_headers => true
+  pod 'FirebaseInstallations', :modular_headers => true
+  pod 'GoogleDataTransport', :modular_headers => true
+  pod 'nanopb', :modular_headers => true
 
   use_react_native!(
     path: config[:reactNativePath],
